@@ -10,6 +10,9 @@ export const useCalendar = () => {
   const [showIds, setShowIds] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<EltEvent | undefined>();
 
+  const [showModal, setShowModal] = useState(false);
+  const toggleModal = () => setShowModal(!showModal);
+
   useEffect(() => {
     const today = moment();
     fetchEvents(today.startOf('week'), today.clone().endOf('week'));
@@ -44,6 +47,20 @@ export const useCalendar = () => {
       moment(event.end)
     );
     setEvents((events) => [...events, { ...event, id }]);
+    toggleModal(); // Close modal after adding the event
+  };
+
+  const editEvent = async (updatedEvent: EltEvent) => {
+    try {
+      await calendarService.updateEvent(updatedEvent.id, updatedEvent);
+      setEvents((prevEvents) =>
+        prevEvents.map((e) =>
+          e.id === updatedEvent.id ? { ...updatedEvent } : e
+        )
+      );
+    } catch (error) {
+      console.error('Error editing event:', error);
+    }
   };
 
   const handleEventDrop = async (event: EltEvent, newStart: Date) => {
@@ -91,9 +108,12 @@ export const useCalendar = () => {
     showIds,
     setShowIds,
     onNavigate,
+    showModal,
+    toggleModal,
     addEvent,
+    editEvent,
     handleEventDrop,
-    handleEventResize, // Return these methods for use in the calendar component
+    handleEventResize, 
     selectedEvent,
     setSelectedEvent,
   };

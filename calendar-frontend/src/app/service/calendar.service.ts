@@ -6,6 +6,7 @@ import { EltEvent } from '../common/types';
 
 
 export class CalendarService extends ApiService {
+  [x: string]: any;
   async getEventsForRange(
     start: Moment,
     end: Moment,

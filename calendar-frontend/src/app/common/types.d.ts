@@ -1,6 +1,11 @@
 import { Event } from 'react-big-calendar';
 
-export interface EltEvent extends Event {
+export interface EltEvent {
+  id?: number; // Permite que `id` seja opcional
   title: string;
-  id: number;
+  start: Date;
+  end: Date;
+  allDay?: boolean;
+  resource?: any;
 }
+
