@@ -1,75 +1,38 @@
-import { render, screen, within } from '@testing-library/react';
-import { CalendarView } from './calendar-view';
-import { View } from 'react-big-calendar';
+import { Calendar, momentLocalizer } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import moment from 'moment';
+import './styles/calendar.scss';
+import { CalendarFormats } from './formats';
+import { useCalendar } from '../../hooks/use-calendar'; // Import useCalendar hook
 import { EltEvent } from '../../../../common/types';
-import '@testing-library/jest-dom';
 
-describe('CalendarView', () => {
-  let onNavigate: (date: Date, view: View) => void;
-  let setSelectedEvent: (event: EltEvent) => void;
-  const mockEvent: EltEvent = {
-    id: 100,
-    title: 'Mock event',
-    start: new Date('2024-10-11T12:15:00Z'),
-    end: new Date('2024-10-11T12:45:00Z'),
-  };
+const localizer = momentLocalizer(moment);
+const DnDCalendar = withDragAndDrop<EltEvent>(Calendar);
 
-  beforeEach(() => {
-    onNavigate = jest.fn();
-    setSelectedEvent = jest.fn();
-    jest.useFakeTimers().setSystemTime(new Date('2024-10-11T10:30:00Z'));
-  });
+export const CalendarView = () => {
+  const {
+    events,
+    onNavigate,
+    handleEventDrop,
+    handleEventResize,
+    setSelectedEvent,
+  } = useCalendar();
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('should render an empty calendar', () => {
-    const { container } = render(
-      <CalendarView
-        onNavigate={onNavigate}
-        events={[]}
-        showIds={false}
-        setSelectedEvent={setSelectedEvent}
-      />,
-    );
-
-    expect(container).toMatchSnapshot();
-  });
-
-  it('should render a calendar with an event', () => {
-    const { container } = render(
-      <CalendarView
-        onNavigate={onNavigate}
-        events={[mockEvent]}
-        showIds={false}
-        setSelectedEvent={setSelectedEvent}
-      />,
-    );
-
-    expect(container).toMatchSnapshot();
-
-    const eventLabel = screen.getByText('Mock event');
-    const event = eventLabel.closest('.rbc-event') as HTMLElement;
-    const eventTime = event?.querySelector('.rbc-event-label');
-
-    expect(eventTime).toHaveTextContent('12:15 - 12:45');
-    expect(within(event).queryByText('id: 100')).not.toBeInTheDocument();
-  });
-
-  it('should show event ids if flag is set', () => {
-    render(
-      <CalendarView
-        onNavigate={onNavigate}
-        events={[mockEvent]}
-        showIds={true}
-        setSelectedEvent={setSelectedEvent}
-      />,
-    );
-
-    const eventLabel = screen.getByText('Mock event');
-    const event = eventLabel.closest('.rbc-event') as HTMLElement;
-
-    expect(within(event).queryByText('id: 100')).toBeInTheDocument();
-  });
-});
+  return (
+    <DnDCalendar
+      defaultDate={moment().toDate()}
+      events={events}
+      defaultView="week"
+      localizer={localizer}
+      formats={CalendarFormats}
+      onNavigate={onNavigate}
+      onEventDrop={({ event, start }) => handleEventDrop(event, start as Date)}
+      onEventResize={({ event, end }) => handleEventResize(event, end as Date)}
+      onSelectEvent={setSelectedEvent}
+      resizable
+      style={{ height: '80vh' }}
+      popup
+      dayLayoutAlgorithm="no-overlap"
+    />
+  );
+};

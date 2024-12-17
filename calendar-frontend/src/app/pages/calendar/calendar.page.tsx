@@ -1,24 +1,25 @@
+// calendar-frontend/src/app/pages/calendar/calendar.page.tsx
+import React, { useState } from 'react';
 import { CalendarView } from './components/calendar-view/calendar-view';
 import { CalendarToolbar } from './components/calendar-toolbar/calendar-toolbar';
-import { useCalendar } from './hooks/use-calendar';
-import { EltEvent } from '../../common/types';
 import { EventModal } from './components/calendar-view/event-modal';
-import { useState } from 'react';
-
+import { useCalendarContext } from './context/calendar.context'; // Import context
+import { EltEvent } from '../../common/types';
 
 export const CalendarPage = () => {
   const {
     events,
-    addEvent,
-    onNavigate,
+    setEvents,
     showIds,
     setShowIds,
     selectedEvent,
     setSelectedEvent,
-    setEvents,
     showModal,
     toggleModal,
-  } = useCalendar();
+    addEvent,
+    editEvent,
+    onNavigate,
+  } = useCalendarContext();
 
   const [editingEvent, setEditingEvent] = useState<EltEvent | null>(null);
 
@@ -51,7 +52,7 @@ export const CalendarPage = () => {
         showIds={showIds}
         setShowIds={setShowIds}
         selectedEvent={selectedEvent}
-        editEvent={handleEditEvent}
+        editEvent={handleEditEvent} // Pass editEvent here
       />
       {showModal && (
         <EventModal

@@ -1,27 +1,34 @@
-import { EltEvent } from '../../../../common/types';
-import { Dispatch } from 'react';
-import { useCalendarToolbar } from '../../hooks/use-calendar-toolbar';
+// calendar-frontend/src/app/pages/calendar/components/calendar-toolbar/calendar-toolbar.tsx
+import React from 'react';
+import { EltEvent } from 'calendar-frontend/src/app/common/types';
+import { useCalendarContext } from '../../context/calendar.context'; // Import context
 import { ToolbarStyle } from './styles/calendar-toolbar-style';
-import React, { useState } from 'react';
-import { EventModal as Modal } from '../calendar-view/event-modal';
 
-interface ICalendarToolbarProps {
+interface CalendarToolbarProps {
+  toggleModal: () => void;
   addEvent: (event: Omit<EltEvent, 'id'>) => Promise<void>;
   showIds: boolean;
-  setShowIds: Dispatch<boolean>;
-  selectedEvent?: EltEvent;
-  toggleModal: () => void;
-  editEvent: (event: EltEvent) => Promise<void>;
+  setShowIds: React.Dispatch<React.SetStateAction<boolean>>;
+  selectedEvent: EltEvent | undefined;
+  editEvent: (event: EltEvent) => void;  // This is now a prop
 }
 
-export const CalendarToolbar = ({
+export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   toggleModal,
   addEvent,
   showIds,
   setShowIds,
   selectedEvent,
   editEvent,
-}: ICalendarToolbarProps) => {
+}) => {
+
+  const handleEditEvent = () => {
+    if (selectedEvent) {
+      // Logic to handle event editing, probably opening a modal
+      editEvent(selectedEvent); // Calls the editEvent passed as a prop
+    }
+  };
+
   return (
     <div css={ToolbarStyle}>
       <button data-testid="add-event-btn" onClick={toggleModal}>
@@ -29,8 +36,8 @@ export const CalendarToolbar = ({
       </button>
       <button
         data-testid="edit-event-btn"
-        onClick={() => editEvent(selectedEvent!)}
-        disabled={!selectedEvent}
+        onClick={handleEditEvent} // Handle the edit event
+        disabled={!selectedEvent} // Disable the button if no event is selected
       >
         Edit event
       </button>
@@ -38,8 +45,8 @@ export const CalendarToolbar = ({
         <input
           id="show-ids-checkbox"
           type="checkbox"
-          defaultChecked={showIds}
-          onClick={(e) => setShowIds(e.currentTarget.checked)}
+          checked={showIds} // Controlled input
+          onChange={(e) => setShowIds(e.target.checked)} // Handle change for checkbox
         />
         Show ids
       </label>
